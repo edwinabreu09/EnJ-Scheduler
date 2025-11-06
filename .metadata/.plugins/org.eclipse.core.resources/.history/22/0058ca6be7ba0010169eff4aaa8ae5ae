@@ -1,0 +1,56 @@
+package controller;
+
+import dao.ScheduleRepository;
+import dao.PatientRepository;
+import model.Schedule;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api")
+public class ScheduleController {
+
+    private final ScheduleRepository scheduleRepository;
+    private final PatientRepository patientRepository;
+
+    public ScheduleController(ScheduleRepository scheduleRepository, PatientRepository patientRepository) {
+        this.scheduleRepository = scheduleRepository;
+        this.patientRepository = patientRepository;
+    }
+
+    @GetMapping("/schedule")
+    public List<Schedule> getAllSchedules() {
+        return scheduleRepository.findAll();
+    }
+
+    @GetMapping("/schedule/{physicianId}")
+    public List<Schedule> getScheduleByPhysician(@PathVariable int physicianId) {
+        return scheduleRepository.findByPhysicianId(physicianId);
+    }
+
+    @PostMapping("/schedule")
+    public Schedule addSchedule(@RequestBody Schedule schedule) {
+        return scheduleRepository.save(schedule);
+    }
+
+    @DeleteMapping("/schedule/{id}")
+    public void deleteSchedule(@PathVariable int id) {
+        scheduleRepository.deleteById(id);
+    }
+
+    @PutMapping("/schedule/{id}")
+    public Schedule updateSchedule(@PathVariable int id, @RequestBody Schedule updatedSchedule) {
+        return scheduleRepository.findById(id).map(s -> {
+            s.setPhysician(updatedSchedule.getPhysician());
+            s.setPatientId(updatedSchedule.getPatientId());
+            s.setDay(updatedSchedule.getDay());
+            s.setTime(updatedSchedule.getTime());
+            return scheduleRepository.save(s);
+        }).orElseGet(() -> {
+            updatedSchedule.setId(id);
+            return scheduleRepository.save(updatedSchedule);
+        });
+    }
+}

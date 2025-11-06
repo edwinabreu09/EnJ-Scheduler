@@ -1,0 +1,62 @@
+package com.example.patientlookup.controller;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+public class TestController {
+
+    @Autowired
+    private DataSource dataSource;
+
+    @GetMapping("/api/test/patients")
+    public List<Map<String, Object>> getPatients() {
+        List<Map<String, Object>> result = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT Id, FirstName, LastName FROM Patients")) {
+
+            while (rs.next()) {
+                result.add(Map.of(
+                        "Id", rs.getInt("Id"),
+                        "FirstName", rs.getString("FirstName"),
+                        "LastName", rs.getString("LastName")
+                ));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @GetMapping("/api/test/physicians")
+    public List<Map<String, Object>> getPhysicians() {
+        List<Map<String, Object>> result = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT Id, PhysicianName FROM Physicians")) {
+
+            while (rs.next()) {
+                result.add(Map.of(
+                        "Id", rs.getInt("Id"),
+                        "PhysicianName", rs.getString("PhysicianName")
+                ));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+}

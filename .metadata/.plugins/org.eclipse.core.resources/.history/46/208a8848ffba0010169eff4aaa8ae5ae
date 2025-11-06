@@ -1,0 +1,40 @@
+package model;
+
+import jakarta.persistence.*;
+
+@Entity
+public class Schedule {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private Integer physicianId;
+    private Integer patientId;
+    private String day;
+    private String time;
+
+    public Schedule() {}
+
+    public Schedule(Integer physicianId, Integer patientId, String day, String time) {
+        this.physicianId = physicianId;
+        this.patientId = patientId;
+        this.day = day;
+        this.time = time;
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public Integer getPhysicianId() { return physicianId; }
+    public void setPhysicianId(Integer physicianId) { this.physicianId = physicianId; }
+
+    public Integer getPatientId() { return patientId; }
+    public void setPatientId(Integer patientId) { this.patientId = patientId; }
+
+    public String getDay() { return day; }
+    public void setDay(String day) { this.day = day; }
+
+    public String getTime() { return time; }
+    public void setTime(String time) { this.time = time; }
+}

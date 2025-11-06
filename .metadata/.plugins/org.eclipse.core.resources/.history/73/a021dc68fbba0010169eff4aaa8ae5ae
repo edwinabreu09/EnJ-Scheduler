@@ -1,0 +1,247 @@
+import { useEffect, useState } from "react";
+
+function App() {
+  const [patients, setPatients] = useState([]);
+  const [filteredPatients, setFilteredPatients] = useState([]);
+  const [physicians, setPhysicians] = useState([]);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [error, setError] = useState("");
+
+  const [selectedPatientId, setSelectedPatientId] = useState(null);
+  const [assignedPhysicians, setAssignedPhysicians] = useState({});
+  const [schedule, setSchedule] = useState({});
+  const [confirmRemove, setConfirmRemove] = useState(null);
+
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const generateTimeSlots = () => {
+    const slots = [];
+    let hour = 7;
+    let min = 0;
+    while (hour < 19 || (hour === 19 && min === 0)) {
+      slots.push(`${hour.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}`);
+      min += 30;
+      if (min === 60) {
+        min = 0;
+        hour += 1;
+      }
+    }
+    return slots;
+  };
+  const timeSlots = generateTimeSlots();
+
+  // ------------------ Load patients, physicians, schedule ------------------
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        // Fetch patients
+        const patientsRes = await fetch("http://localhost:8080/api/patients");
+        const patientsData = await patientsRes.json();
+        const mappedPatients = patientsData.map(p => ({
+          ...p,
+          name: `${p.FirstName} ${p.LastName}`
+        }));
+        setPatients(mappedPatients);
+        setFilteredPatients(mappedPatients);
+
+        // Fetch physicians
+        const physiciansRes = await fetch("http://localhost:8080/api/physicians");
+        const physiciansData = await physiciansRes.json();
+        const physicianNames = physiciansData.map(p => p.PhysicianName || p.name);
+        setPhysicians(physicianNames);
+
+        // Fetch schedule
+        const scheduleRes = await fetch("http://localhost:8080/api/schedule");
+        const scheduleData = await scheduleRes.json();
+        const sched = {};
+        scheduleData.forEach(s => {
+          const physicianName = s.physician?.PhysicianName || s.physician?.name;
+          const patient = mappedPatients.find(p => p.Id === s.PatientId);
+          if (!sched[physicianName]) sched[physicianName] = {};
+          sched[physicianName][`${s.Day}-${s.Time}`] = patient ? patient.name : `Patient ${s.PatientId}`;
+        });
+        setSchedule(sched);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to fetch data from backend");
+      }
+    };
+
+    fetchAllData();
+  }, []);
+
+  // ------------------ Patient search ------------------
+  const handleSearch = () => {
+    if (firstName.trim().length < 3 && lastName.trim().length < 3) {
+      setError("Enter at least 3 characters.");
+      return;
+    }
+    setError("");
+    const filtered = patients.filter(p => {
+      const nameLower = p.name.toLowerCase();
+      const firstLower = firstName.trim().toLowerCase();
+      const lastLower = lastName.trim().toLowerCase();
+      if (firstLower && lastLower) return nameLower.includes(firstLower) && nameLower.includes(lastLower);
+      if (firstLower) return nameLower.includes(firstLower);
+      if (lastLower) return nameLower.includes(lastLower);
+      return false;
+    });
+    setFilteredPatients(filtered);
+  };
+
+  // ------------------ Select patient ------------------
+  const handlePatientClick = id => setSelectedPatientId(id === selectedPatientId ? null : id);
+
+  // ------------------ Assign physician ------------------
+  const handlePhysicianChange = (patientId, physician) => {
+    setAssignedPhysicians({ ...assignedPhysicians, [patientId]: physician });
+  };
+
+  // ------------------ Slot toggle ------------------
+  const handleSlotToggle = async (physician, day, time) => {
+    if (!selectedPatientId) return;
+    const key = `${day}-${time}`;
+    const currentCell = schedule[physician]?.[key];
+
+    if (currentCell) {
+      setConfirmRemove({ physician, day, time });
+      return;
+    }
+
+    const currentPatientName = patients.find(p => p.Id === selectedPatientId)?.name;
+
+    // Update frontend state
+    setSchedule(prev => ({
+      ...prev,
+      [physician]: { ...prev[physician], [key]: currentPatientName }
+    }));
+
+    // Save to backend
+    try {
+      const physicianId = physicians.indexOf(physician) + 1; // Map name to ID
+      await fetch("http://localhost:8080/api/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          PhysicianId: physicianId,
+          PatientId: selectedPatientId,
+          Day: day,
+          Time: time
+        })
+      });
+    } catch (err) {
+      console.error("Error saving schedule:", err);
+    }
+  };
+
+  // ------------------ Remove slot ------------------
+  const confirmRemoveYes = async () => {
+    if (!confirmRemove) return;
+    const { physician, day, time } = confirmRemove;
+    const key = `${day}-${time}`;
+    setSchedule(prev => ({
+      ...prev,
+      [physician]: { ...prev[physician], [key]: null }
+    }));
+
+    try {
+      const schedRes = await fetch("http://localhost:8080/api/schedule");
+      const schedData = await schedRes.json();
+      const entry = schedData.find(s => s.physician?.PhysicianName === physician && s.Day === day && s.Time === time);
+      if (entry) await fetch(`http://localhost:8080/api/schedule/${entry.Id}`, { method: "DELETE" });
+    } catch (err) {
+      console.error("Error removing schedule:", err);
+    }
+
+    setConfirmRemove(null);
+  };
+  const confirmRemoveNo = () => setConfirmRemove(null);
+
+  const selectedPhysician = selectedPatientId ? assignedPhysicians[selectedPatientId] : null;
+  const isButtonDisabled = firstName.trim().length < 3 && lastName.trim().length < 3;
+
+  return (
+    <div style={{ padding: "20px", fontFamily: "Arial", minHeight: "100vh", background: "linear-gradient(180deg, #001F3F, #003366)", color: "white" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "normal" }}>Patient Lookup & Schedule</h2>
+        <h1 style={{ margin: 0, fontSize: "28px", fontWeight: "bold", color: "#00BFFF" }}>EIJ Scheduler</h1>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "20px" }}>
+        {/* Patient Search & List */}
+        <div style={{ flex: 1, maxHeight: "85vh", overflowY: "auto" }}>
+          <div style={{ marginBottom: "15px" }}>
+            <input type="text" placeholder="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} style={{ marginRight: "10px", padding: "5px" }} />
+            <input type="text" placeholder="Last Name" value={lastName} onChange={e => setLastName(e.target.value)} style={{ marginRight: "10px", padding: "5px" }} />
+            <button onClick={handleSearch} disabled={isButtonDisabled} style={{ padding: "6px 12px" }}>Go</button>
+          </div>
+          {error && <p style={{ color: "red" }}>{error}</p>}
+          {filteredPatients.length === 0 ? <p>No matching patients found.</p> :
+            <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+              {filteredPatients.map(p => (
+                <li key={p.Id} style={{ marginBottom: "10px", cursor: "pointer", backgroundColor: selectedPatientId === p.Id ? "#224" : "transparent", padding: "5px", borderRadius: "4px" }}>
+                  <span onClick={() => handlePatientClick(p.Id)} style={{ fontWeight: selectedPatientId === p.Id ? "bold" : "normal", color: selectedPatientId === p.Id ? "#00BFFF" : "white" }}>
+                    {p.Id}: {p.name}
+                  </span>
+                  {selectedPatientId === p.Id && (
+                    <select style={{ marginLeft: "10px", padding: "4px" }} value={assignedPhysicians[p.Id] || ""} onChange={(e) => handlePhysicianChange(p.Id, e.target.value)}>
+                      <option value="">Select Physician</option>
+                      {physicians.map((doc, idx) => <option key={idx} value={doc}>{doc}</option>)}
+                    </select>
+                  )}
+                </li>
+              ))}
+            </ul>
+          }
+        </div>
+
+        {/* Schedule Table */}
+        {selectedPhysician && (
+          <div style={{ flex: 2, overflowX: "auto" }}>
+            <h2>Schedule for {selectedPhysician}</h2>
+            <table style={{ borderCollapse: "collapse", width: "100%", textAlign: "center", backgroundColor: "#001a33" }}>
+              <thead>
+                <tr>
+                  <th style={{ border: "1px solid #ccc", padding: "5px", width: "60px" }}>Time</th>
+                  {days.map(d => <th key={d} style={{ border: "1px solid #ccc", padding: "5px" }}>{d}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {timeSlots.map(time => (
+                  <tr key={time}>
+                    <td style={{ border: "1px solid #ccc", padding: "5px", width: "60px" }}>{time}</td>
+                    {days.map(day => {
+                      const key = `${day}-${time}`;
+                      const cellPatient = schedule[selectedPhysician]?.[key];
+                      const isBooked = Boolean(cellPatient);
+                      return (
+                        <td key={key} style={{ border: "1px solid #ccc", padding: "5px", backgroundColor: isBooked ? "#555" : "#228B22", height: "40px", width: "120px", position: "relative", cursor: "pointer" }}
+                          onClick={() => { if (isBooked) setConfirmRemove({ physician: selectedPhysician, day, time }) }}>
+                          {!isBooked ? <input type="checkbox" onChange={() => handleSlotToggle(selectedPhysician, day, time)} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", cursor: "pointer" }} /> :
+                            <span style={{ color: "white", fontWeight: "bold", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", whiteSpace: "nowrap", textShadow: "1px 1px 2px black" }}>{cellPatient}</span>
+                          }
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Confirm Remove Modal */}
+      {confirmRemove && (
+        <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", background: "rgba(0,0,0,0.9)", padding: "30px", borderRadius: "10px", zIndex: 1000, color: "white", textAlign: "center" }}>
+          <p>Remove this patient from this timeslot?</p>
+          <button onClick={confirmRemoveYes} style={{ margin: "5px", padding: "6px 12px" }}>Yes</button>
+          <button onClick={confirmRemoveNo} style={{ margin: "5px", padding: "6px 12px" }}>No</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;

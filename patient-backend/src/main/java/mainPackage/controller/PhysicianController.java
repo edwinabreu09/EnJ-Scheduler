@@ -1,0 +1,47 @@
+package mainPackage.controller;
+
+import mainPackage.dao.PhysicianRepository;
+import mainPackage.model.Physician;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api")
+public class PhysicianController {
+
+    private final PhysicianRepository physicianRepository;
+
+    public PhysicianController(PhysicianRepository physicianRepository) {
+        this.physicianRepository = physicianRepository;
+    }
+
+    @GetMapping("/physicians")
+    public List<Physician> getPhysicians() {
+        return physicianRepository.findAll();
+    }
+
+    @PostMapping("/physicians")
+    public Physician addPhysician(@RequestBody Physician physician) {
+        return physicianRepository.save(physician);
+    }
+
+    @PutMapping("/physicians/{id}")
+    public Physician updatePhysician(@PathVariable Integer id, @RequestBody Physician updated) {
+        return physicianRepository.findById(id)
+                .map(p -> {
+                    p.setPhysicianName(updated.getPhysicianName());
+                    return physicianRepository.save(p);
+                })
+                .orElseGet(() -> {
+                    updated.setId(id);
+                    return physicianRepository.save(updated);
+                });
+    }
+
+    @DeleteMapping("/physicians/{id}")
+    public void deletePhysician(@PathVariable Integer id) {
+        physicianRepository.deleteById(id);
+    }
+}

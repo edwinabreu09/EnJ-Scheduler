@@ -1,0 +1,50 @@
+package model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "schedule")
+public class Schedule {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne
+    @JoinColumn(name = "PhysicianId")
+    private Physician physician;
+
+    @ManyToOne
+    @JoinColumn(name = "PatientId")
+    private Patient patient;
+
+    @Column(name = "Day")
+    private String day;
+
+    @Column(name = "Time")
+    private String time;
+
+    public Schedule() {}
+
+    public Schedule(Physician physician, Patient patient, String day, String time) {
+        this.physician = physician;
+        this.patient = patient;
+        this.day = day;
+        this.time = time;
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public Physician getPhysician() { return physician; }
+    public void setPhysician(Physician physician) { this.physician = physician; }
+
+    public Patient getPatient() { return patient; }
+    public void setPatient(Patient patient) { this.patient = patient; }
+
+    public String getDay() { return day; }
+    public void setDay(String day) { this.day = day; }
+
+    public String getTime() { return time; }
+    public void setTime(String time) { this.time = time; }
+}

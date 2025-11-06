@@ -1,0 +1,20 @@
+package com.example.patientlookup;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+
+@SpringBootApplication
+@ComponentScan(basePackages = {
+        "com.example.patientlookup", // your main package
+        "controller",                // top-level controller package
+        "dao",
+        "model",
+        "service",
+        "util"
+})
+public class PatientLookupApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(PatientLookupApplication.class, args);
+    }
+}

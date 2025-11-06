@@ -1,0 +1,42 @@
+package mainPackage.model;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "Patients") // Match exact table name
+public class Patient {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer Id; // match column case in SQL Server
+
+    @Column(name = "FirstName")
+    private String FirstName;
+
+    @Column(name = "LastName")
+    private String LastName;
+
+    @Column(name = "DOB")
+    private LocalDate DOB;
+
+    public Patient() {}
+
+    public Patient(String FirstName, String LastName, LocalDate DOB) {
+        this.FirstName = FirstName;
+        this.LastName = LastName;
+        this.DOB = DOB;
+    }
+
+    public Integer getId() { return Id; }
+    public void setId(Integer Id) { this.Id = Id; }
+
+    public String getFirstName() { return FirstName; }
+    public void setFirstName(String FirstName) { this.FirstName = FirstName; }
+
+    public String getLastName() { return LastName; }
+    public void setLastName(String LastName) { this.LastName = LastName; }
+
+    public LocalDate getDOB() { return DOB; }
+    public void setDOB(LocalDate DOB) { this.DOB = DOB; }
+}

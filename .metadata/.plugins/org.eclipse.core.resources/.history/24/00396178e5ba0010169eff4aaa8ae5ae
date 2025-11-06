@@ -1,0 +1,20 @@
+package model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "Physicians")
+public class Physician {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    private String physicianName;
+
+    public Physician() {}
+    public Physician(String physicianName) { this.physicianName = physicianName; }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public String getPhysicianName() { return physicianName; }
+    public void setPhysicianName(String physicianName) { this.physicianName = physicianName; }
+}

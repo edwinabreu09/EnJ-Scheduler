@@ -1,155 +1,139 @@
-5:48:28 Memory Pressure: Moderate
-5:48:30 Tab3 StartNav45 #typed
-5:48:30 Tab3 FinishNav45
-5:48:30 Tab3 PageLoad
-5:48:38 Memory Pressure: Moderate
-5:48:48 Memory Pressure: Moderate
-5:48:58 Memory Pressure: Moderate
-5:49:01 Tab3 StartNav46 #typed
-5:49:01 Tab3 FinishNav46
-5:49:01 Tab3 PageLoad
-5:49:08 Memory Pressure: Moderate
-5:49:18 Memory Pressure: Moderate
-5:49:28 Memory Pressure: Moderate
-5:49:38 Memory Pressure: Moderate
-5:49:48 Memory Pressure: Moderate
-5:49:58 Memory Pressure: Moderate
-5:50:08 Memory Pressure: Moderate
-5:50:19 Memory Pressure: Moderate
-5:50:29 Memory Pressure: Moderate
-5:50:39 Memory Pressure: Moderate
-5:50:40 Tab3 StartNav47 #typed
-5:50:41 Tab3 FinishNav47
-5:50:41 Tab3 PageLoad
-5:50:49 Memory Pressure: Moderate
-5:51:24 Memory Pressure: Moderate
-5:51:34 Memory Pressure: Moderate
-5:51:44 Memory Pressure: Moderate
-5:51:54 Memory Pressure: Moderate
-5:52:04 Memory Pressure: Moderate
-5:52:14 Memory Pressure: Moderate
-5:52:24 Memory Pressure: Moderate
-5:52:34 Memory Pressure: Moderate
-5:52:44 Memory Pressure: Moderate
-5:52:44 Tab3 StartNav48 #typed
-5:52:44 Tab3 FinishNav48
-5:52:44 Tab3 PageLoad
-5:52:54 Memory Pressure: Moderate
-5:53:29 Memory Pressure: Moderate
-5:53:39 Memory Pressure: Moderate
-5:53:49 Memory Pressure: Moderate
-5:53:59 Memory Pressure: Moderate
-5:54:09 Memory Pressure: Moderate
-5:54:19 Memory Pressure: Moderate
-5:54:29 Memory Pressure: Moderate
-5:54:39 Memory Pressure: Moderate
-5:54:49 Memory Pressure: Moderate
-5:54:59 Memory Pressure: Moderate
-5:55:09 Memory Pressure: Moderate
-5:55:19 Memory Pressure: Moderate
-5:55:29 Memory Pressure: Moderate
-5:55:39 Memory Pressure: Moderate
-5:55:49 Memory Pressure: Moderate
-5:55:59 Memory Pressure: Moderate
-5:56:24 Memory Pressure: Moderate
-5:56:34 Memory Pressure: Moderate
-5:56:54 Memory Pressure: Moderate
-5:57:04 Memory Pressure: Moderate
-5:57:14 Memory Pressure: Moderate
-5:57:29 Memory Pressure: Moderate
-5:57:39 Memory Pressure: Moderate
-5:57:49 Memory Pressure: Moderate
-5:57:59 Memory Pressure: Moderate
-6:01:20 Memory Pressure: Moderate
-6:01:40 Memory Pressure: Moderate
-6:01:51 Tab3 StartNav49 #typed
-6:01:51 Tab3 FinishNav49
-6:01:51 Tab3 PageLoad
-6:01:55 Memory Pressure: Critical
-6:02:00 Memory Pressure: Moderate
-6:02:10 Memory Pressure: Moderate
-6:02:20 Memory Pressure: Moderate
-6:02:30 Memory Pressure: Moderate
-6:02:40 Memory Pressure: Moderate
-6:02:50 Memory Pressure: Moderate
-6:03:00 Memory Pressure: Moderate
-6:03:35 Memory Pressure: Moderate
-6:03:45 Memory Pressure: Moderate
-6:03:55 Memory Pressure: Moderate
-6:04:05 Memory Pressure: Moderate
-6:04:15 Memory Pressure: Moderate
-6:04:25 Memory Pressure: Moderate
-6:04:35 Memory Pressure: Moderate
-6:04:45 Memory Pressure: Moderate
-6:04:55 Memory Pressure: Moderate
-6:05:05 Memory Pressure: Moderate
-6:05:15 Memory Pressure: Moderate
-6:05:25 Memory Pressure: Critical
-6:05:30 Memory Pressure: Moderate
-6:05:40 Memory Pressure: Moderate
-6:05:50 Memory Pressure: Moderate
-6:06:00 Memory Pressure: Moderate
-6:06:35 Memory Pressure: Moderate
-6:06:45 Memory Pressure: Moderate
-6:06:55 Memory Pressure: Moderate
-6:07:15 Memory Pressure: Moderate
-6:10:25 Tab3 StartNav50 #typed
-6:10:25 Tab3 FinishNav50
-6:10:25 Tab3 PageLoad
-6:10:31 Memory Pressure: Moderate
-6:10:41 Memory Pressure: Moderate
-6:10:51 Memory Pressure: Moderate
-6:11:06 Memory Pressure: Moderate
-6:11:16 Memory Pressure: Moderate
-6:11:26 Memory Pressure: Moderate
-6:11:36 Memory Pressure: Moderate
-6:12:41 Memory Pressure: Moderate
-6:13:52 Tab3 StartNav51 #typed
-6:13:52 Tab3 FinishNav51
-6:13:52 Tab3 PageLoad
-6:13:53 Tab3 StartNav52 #typed
-6:13:53 Tab3 FinishNav52
-6:13:53 Tab3 PageLoad
-6:13:56 Memory Pressure: Moderate
-6:14:06 Memory Pressure: Moderate
-6:14:07 Tab3 StartNav53 #typed
-6:14:07 Tab3 FinishNav53
-6:14:07 Tab3 PageLoad
-6:14:08 Tab3 StartNav54 #typed
-6:14:08 Tab3 FinishNav54
-6:14:08 Tab3 PageLoad
-6:14:16 Memory Pressure: Moderate
-6:14:26 Memory Pressure: Moderate
-6:14:36 Memory Pressure: Moderate
-6:14:46 Memory Pressure: Moderate
-6:14:56 Memory Pressure: Moderate
-6:15:06 Memory Pressure: Moderate
-6:15:16 Memory Pressure: Moderate
-6:15:26 Memory Pressure: Moderate
-6:15:36 Memory Pressure: Moderate
-6:15:46 Memory Pressure: Moderate
-6:15:56 Memory Pressure: Moderate
-6:16:06 Memory Pressure: Moderate
-6:16:16 Memory Pressure: Moderate
-6:16:26 Memory Pressure: Moderate
-6:16:36 Memory Pressure: Moderate
-6:16:46 Memory Pressure: Moderate
-6:16:56 Memory Pressure: Moderate
-6:17:00 Microsoft.UnloadController.IsUnclosableApp_IsNotWebApp
-0:00:00 Startup
-0:00:00 Microsoft.DeleteProfileHelper.CleanUpEphemeralProfiles
-0:00:00 Microsoft.DeleteProfileHelper.CleanUpDeletedProfiles
-0:00:00 Microsoft.NewBrowser_Popup
-0:00:00 Microsoft.BrowserList.AddBrowser
-0:00:00 Browser1 Insert active Tab1 at 0
-0:00:00 Tab1 StartNav1 #auto_toplevel
-0:00:00 Tab1 StartNav2 #typed
-0:00:00 Tab1 FinishNav1
-0:00:00 Tab1 PageLoad
-0:00:01 Tab1 FinishNav2
-0:00:02 Tab1 PageLoad
-0:00:04 Memory Pressure: Moderate
-0:00:15 Memory Pressure: Moderate
-0:00:25 Memory Pressure: Moderate
-0:00:35 Memory Pressure: Moderate
-0:00:39 Microsoft.UnloadController.IsUnclosableApp_IsNotWebApp
+5:08:25 Microsoft.Shutdown.TabStripModel.ShouldRunUnloadListenerBeforeClosing_false
+5:08:25 Tab30 RenderProcessGone
+5:08:25 Microsoft.UnloadController.ClearUnloadState
+5:08:25 Microsoft.Shutdown.TabStripModel.RunUnloadListenerBeforeClosing_false
+5:08:25 Microsoft.Shutdown.TabStripModel.InternalCloseTabsImpl_ClosedAll
+5:08:25 Microsoft.Shutdown.TabStripModel.SendDetachWebContentsNotifications
+5:08:25 Microsoft.UnloadController.ClearUnloadState
+5:08:25 Browser30 Close Tab30 at 0
+5:08:25 Tab30 WebContentsDestroyed
+5:08:25 Microsoft.UnloadController.TabStripEmpty
+5:08:25 Microsoft.UnloadController.IsUnclosableApp_IsNotWebApp
+5:08:25 Microsoft.UnloadController.HasCompletedUnloadProcessing_True
+5:08:25 Microsoft.Shutdown.OnWindowClosing
+5:08:25 Microsoft.UnloadController.IsUnclosableApp_IsNotWebApp
+5:08:25 Microsoft.UnloadController.HasCompletedUnloadProcessing_True
+5:08:25 Microsoft.Shutdown.OnWindowClosingPostClearBrowsingData_NoBrowsingDataCleared
+5:08:25 Widget Closed: BrowserFrame
+5:08:25 Microsoft.UnloadController.HasCompletedUnloadProcessing_True
+5:08:25 Microsoft.Shutdown.OnWindowClosing
+5:08:25 Microsoft.Shutdown.OnWindowClosing_DeleteScheduled
+5:08:25 Microsoft.Browser_Removed
+5:08:25 Microsoft.NewBrowser_Popup
+5:08:25 Microsoft.BrowserList.AddBrowser
+5:08:25 Browser31 Insert active Tab31 at 0
+5:08:25 Tab31 StartNav374 #auto_toplevel
+5:08:25 Tab31 StartNav375 #typed
+5:08:25 Tab31 FinishNav374
+5:08:25 Tab31 PageLoad
+5:08:25 Tab31 FinishNav375
+5:08:25 Tab31 PageLoad
+5:08:27 Tab31 StartNav376 #typed
+5:08:27 Tab31 FinishNav376
+5:08:27 Tab31 PageLoad
+5:08:27 Memory Pressure: Moderate
+5:08:37 Memory Pressure: Moderate
+5:08:43 Tab31 StartNav377 #typed
+5:08:44 Tab31 FinishNav377
+5:08:44 Tab31 PageLoad
+5:08:44 Tab31 StartNav378 #typed
+5:08:44 Tab31 FinishNav378
+5:08:44 Tab31 PageLoad
+5:08:45 Tab31 StartNav379 #typed
+5:08:45 Tab31 FinishNav379
+5:08:45 Tab31 PageLoad
+5:08:47 Memory Pressure: Moderate
+5:09:21 Tab31 StartNav380 #typed
+5:09:21 Tab31 FinishNav380
+5:09:21 Tab31 PageLoad
+5:09:57 Memory Pressure: Moderate
+5:10:31 Tab31 StartNav381 #typed
+5:10:31 Tab31 FinishNav381
+5:10:31 Tab31 PageLoad
+5:10:32 Memory Pressure: Moderate
+5:10:42 Memory Pressure: Moderate
+5:11:07 Memory Pressure: Moderate
+5:11:17 Memory Pressure: Moderate
+5:11:31 Tab31 StartNav382 #typed
+5:11:31 Tab31 FinishNav382
+5:11:31 Tab31 PageLoad
+5:11:32 Memory Pressure: Moderate
+5:11:42 Memory Pressure: Moderate
+5:11:52 Memory Pressure: Moderate
+5:12:02 Memory Pressure: Moderate
+5:12:12 Memory Pressure: Moderate
+5:12:22 Memory Pressure: Moderate
+5:12:32 Tab31 StartNav383 #typed
+5:12:32 Tab31 FinishNav383
+5:12:32 Tab31 PageLoad
+5:12:32 Memory Pressure: Moderate
+5:12:33 Tab31 StartNav384 #typed
+5:12:33 Tab31 FinishNav384
+5:12:33 Tab31 PageLoad
+5:12:42 Memory Pressure: Moderate
+5:12:52 Memory Pressure: Moderate
+5:13:02 Memory Pressure: Moderate
+5:13:03 Tab31 StartNav385 #typed
+5:13:03 Tab31 FinishNav385
+5:13:03 Tab31 PageLoad
+5:13:12 Memory Pressure: Moderate
+5:13:21 Tab31 StartNav386 #typed
+5:13:21 Tab31 FinishNav386
+5:13:21 Tab31 PageLoad
+5:13:22 Memory Pressure: Moderate
+5:13:32 Memory Pressure: Moderate
+5:13:37 Memory Pressure: Critical
+5:15:08 Memory Pressure: Moderate
+5:15:11 Tab31 StartNav387 #typed
+5:15:11 Tab31 FinishNav387
+5:15:11 Tab31 PageLoad
+5:15:18 Memory Pressure: Moderate
+5:15:28 Memory Pressure: Moderate
+5:15:38 Memory Pressure: Moderate
+5:15:48 Memory Pressure: Moderate
+5:15:58 Memory Pressure: Moderate
+5:16:08 Memory Pressure: Moderate
+5:16:18 Memory Pressure: Moderate
+5:16:28 Memory Pressure: Moderate
+5:16:38 Memory Pressure: Moderate
+5:16:48 Memory Pressure: Moderate
+5:16:58 Memory Pressure: Moderate
+5:17:08 Memory Pressure: Moderate
+5:17:18 Memory Pressure: Moderate
+5:18:38 Memory Pressure: Moderate
+5:18:39 Tab31 StartNav388 #typed
+5:18:39 Tab31 FinishNav388
+5:18:40 Tab31 PageLoad
+5:18:53 Memory Pressure: Moderate
+5:18:55 Tab31 StartNav389 #typed
+5:18:55 Tab31 FinishNav389
+5:18:55 Tab31 PageLoad
+5:19:23 Memory Pressure: Moderate
+5:19:33 Memory Pressure: Moderate
+5:19:43 Memory Pressure: Moderate
+5:19:53 Memory Pressure: Moderate
+5:20:03 Memory Pressure: Moderate
+5:20:13 Memory Pressure: Moderate
+5:20:18 Memory Pressure: Critical
+5:20:23 Memory Pressure: Moderate
+5:20:33 Memory Pressure: Moderate
+5:20:43 Memory Pressure: Moderate
+5:20:53 Memory Pressure: Moderate
+5:21:03 Memory Pressure: Moderate
+5:21:13 Memory Pressure: Moderate
+5:21:23 Memory Pressure: Moderate
+5:21:33 Memory Pressure: Moderate
+5:21:43 Memory Pressure: Moderate
+5:21:53 Memory Pressure: Moderate
+5:22:03 Memory Pressure: Moderate
+5:22:13 Memory Pressure: Moderate
+5:22:23 Memory Pressure: Moderate
+5:22:33 Memory Pressure: Moderate
+5:22:43 Memory Pressure: Moderate
+5:22:53 Memory Pressure: Moderate
+5:23:03 Memory Pressure: Moderate
+5:23:13 Memory Pressure: Moderate
+5:23:23 Memory Pressure: Moderate
+5:23:33 Memory Pressure: Moderate
+5:23:43 Memory Pressure: Moderate
+5:23:53 Memory Pressure: Moderate

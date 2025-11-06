@@ -1,0 +1,60 @@
+package controller;
+
+import dao.PatientRepository;
+import dto.PatientDTO;
+import model.Patient;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api")
+public class PatientController {
+
+    private final PatientRepository patientRepository;
+
+    public PatientController(PatientRepository patientRepository) {
+        this.patientRepository = patientRepository;
+    }
+
+    // Get all patients
+    @GetMapping("/patients")
+    public List<PatientDTO> getPatients() {
+        return patientRepository.findAll().stream()
+                .map(p -> new PatientDTO(p.getId(), p.getFirstName(), p.getLastName()))
+                .collect(Collectors.toList());
+    }
+
+    // Add new patient
+    @PostMapping("/patients")
+    public PatientDTO addPatient(@RequestBody PatientDTO patientDTO) {
+        Patient patient = new Patient(patientDTO.getFirstName(), patientDTO.getLastName());
+        Patient saved = patientRepository.save(patient);
+        return new PatientDTO(saved.getId(), saved.getFirstName(), saved.getLastName());
+    }
+
+    // Update patient
+    @PutMapping("/patients/{id}")
+    public PatientDTO updatePatient(@PathVariable Integer id, @RequestBody PatientDTO updated) {
+        Patient patient = patientRepository.findById(id)
+                .map(p -> {
+                    p.setFirstName(updated.getFirstName());
+                    p.setLastName(updated.getLastName());
+                    return patientRepository.save(p);
+                })
+                .orElseGet(() -> {
+                    Patient newPatient = new Patient(updated.getFirstName(), updated.getLastName());
+                    newPatient.setId(id);
+                    return patientRepository.save(newPatient);
+                });
+        return new PatientDTO(patient.getId(), patient.getFirstName(), patient.getLastName());
+    }
+
+    // Delete patient
+    @DeleteMapping("/patients/{id}")
+    public void deletePatient(@PathVariable Integer id) {
+        patientRepository.deleteById(id);
+    }
+}

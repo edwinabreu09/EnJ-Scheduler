@@ -1,0 +1,27 @@
+package mainPackage.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "Physicians") // Match exact table name
+public class Physician {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer Id;
+
+    @Column(name = "PhysicianName")
+    private String PhysicianName;
+
+    public Physician() {}
+
+    public Physician(String PhysicianName) {
+        this.PhysicianName = PhysicianName;
+    }
+
+    public Integer getId() { return Id; }
+    public void setId(Integer Id) { this.Id = Id; }
+
+    public String getPhysicianName() { return PhysicianName; }
+    public void setPhysicianName(String PhysicianName) { this.PhysicianName = PhysicianName; }
+}

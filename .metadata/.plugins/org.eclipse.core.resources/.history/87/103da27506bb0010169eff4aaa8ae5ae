@@ -1,0 +1,27 @@
+package mainPackage.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "physicians") // matches your DB table
+public class Physician {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "PhysicianName")
+    private String physicianName;
+
+    public Physician() {}
+
+    public Physician(String physicianName) {
+        this.physicianName = physicianName;
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public String getPhysicianName() { return physicianName; }
+    public void setPhysicianName(String physicianName) { this.physicianName = physicianName; }
+}

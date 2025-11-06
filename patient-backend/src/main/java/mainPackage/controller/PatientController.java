@@ -1,0 +1,48 @@
+package mainPackage.controller;
+
+import mainPackage.dao.PatientRepository;
+import mainPackage.model.Patient;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api")
+public class PatientController {
+
+    private final PatientRepository patientRepository;
+
+    public PatientController(PatientRepository patientRepository) {
+        this.patientRepository = patientRepository;
+    }
+
+    @GetMapping("/patients")
+    public List<Patient> getPatients() {
+        return patientRepository.findAll();
+    }
+
+    @PostMapping("/patients")
+    public Patient addPatient(@RequestBody Patient patient) {
+        return patientRepository.save(patient);
+    }
+
+    @PutMapping("/patients/{id}")
+    public Patient updatePatient(@PathVariable Integer id, @RequestBody Patient updated) {
+        return patientRepository.findById(id)
+                .map(p -> {
+                    p.setFirstName(updated.getFirstName());
+                    p.setLastName(updated.getLastName());
+                    return patientRepository.save(p);
+                })
+                .orElseGet(() -> {
+                    updated.setId(id);
+                    return patientRepository.save(updated);
+                });
+    }
+
+    @DeleteMapping("/patients/{id}")
+    public void deletePatient(@PathVariable Integer id) {
+        patientRepository.deleteById(id);
+    }
+}

@@ -1,0 +1,161 @@
+import { useEffect, useState } from "react";
+
+function App() {
+  const [patients, setPatients] = useState([]);
+  const [physicians, setPhysicians] = useState([]);
+  const [schedule, setSchedule] = useState({});
+  const [selectedPatientId, setSelectedPatientId] = useState(null);
+  const [assignedPhysicians, setAssignedPhysicians] = useState({});
+  const [confirmRemove, setConfirmRemove] = useState(null);
+
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const generateTimeSlots = () => {
+    const slots = [];
+    let hour = 7;
+    let min = 0;
+    while (hour < 19 || (hour === 19 && min === 0)) {
+      slots.push(`${hour.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}`);
+      min += 30;
+      if (min === 60) { min = 0; hour += 1; }
+    }
+    return slots;
+  };
+  const timeSlots = generateTimeSlots();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const patientsRes = await fetch("http://localhost:8080/api/patients");
+        const patientsData = await patientsRes.json();
+        setPatients(patientsData.map(p => ({ ...p, name: `${p.firstName} ${p.lastName}` })));
+
+        const physiciansRes = await fetch("http://localhost:8080/api/physicians");
+        const physiciansData = await physiciansRes.json();
+        setPhysicians(physiciansData);
+
+        const scheduleRes = await fetch("http://localhost:8080/api/schedule");
+        const scheduleData = await scheduleRes.json();
+        const sched = {};
+        scheduleData.forEach(s => {
+          const physicianName = s.physician.physicianName;
+          if (!sched[physicianName]) sched[physicianName] = {};
+          sched[physicianName][`${s.day}-${s.time}`] = s.patient.name;
+        });
+        setSchedule(sched);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handlePatientClick = id => setSelectedPatientId(id === selectedPatientId ? null : id);
+
+  const handlePhysicianChange = (patientId, physicianName) => {
+    setAssignedPhysicians({ ...assignedPhysicians, [patientId]: physicianName });
+  };
+
+  const handleSlotToggle = async (physicianName, day, time) => {
+    if (!selectedPatientId) return;
+    const key = `${day}-${time}`;
+    if (schedule[physicianName]?.[key]) { setConfirmRemove({ physicianName, day, time }); return; }
+
+    const patient = patients.find(p => p.id === selectedPatientId);
+    const physician = physicians.find(p => p.physicianName === physicianName);
+
+    setSchedule(prev => ({
+      ...prev,
+      [physicianName]: { ...prev[physicianName], [key]: patient.name }
+    }));
+
+    try {
+      await fetch("http://localhost:8080/api/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ patient: { id: patient.id }, physician: { id: physician.id }, day, time })
+      });
+    } catch (err) {
+      console.error("Error saving schedule:", err);
+    }
+  };
+
+  const confirmRemoveYes = async () => {
+    const { physicianName, day, time } = confirmRemove;
+    const key = `${day}-${time}`;
+    setSchedule(prev => ({
+      ...prev,
+      [physicianName]: { ...prev[physicianName], [key]: null }
+    }));
+
+    try {
+      const schedRes = await fetch("http://localhost:8080/api/schedule");
+      const schedData = await schedRes.json();
+      const entry = schedData.find(s => s.physician.physicianName === physicianName && s.day === day && s.time === time);
+      if (entry) await fetch(`http://localhost:8080/api/schedule/${entry.id}`, { method: "DELETE" });
+    } catch (err) { console.error("Error removing schedule:", err); }
+
+    setConfirmRemove(null);
+  };
+  const confirmRemoveNo = () => setConfirmRemove(null);
+
+  const selectedPhysician = selectedPatientId ? assignedPhysicians[selectedPatientId] : null;
+
+  return (
+    <div>
+      <h2>Patient Lookup & Schedule</h2>
+      <div>
+        {patients.map(p => (
+          <div key={p.id} onClick={() => handlePatientClick(p.id)}>
+            {p.name}
+            {selectedPatientId === p.id && (
+              <select value={assignedPhysicians[p.id] || ""} onChange={e => handlePhysicianChange(p.id, e.target.value)}>
+                <option value="">Select Physician</option>
+                {physicians.map(doc => <option key={doc.id} value={doc.physicianName}>{doc.physicianName}</option>)}
+              </select>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {selectedPhysician && (
+        <div>
+          <h3>Schedule for {selectedPhysician}</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>{days.map(d => <th key={d}>{d}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {timeSlots.map(time => (
+                <tr key={time}>
+                  <td>{time}</td>
+                  {days.map(day => {
+                    const key = `${day}-${time}`;
+                    const cellPatient = schedule[selectedPhysician]?.[key];
+                    return (
+                      <td key={key} onClick={() => cellPatient ? setConfirmRemove({ physicianName: selectedPhysician, day, time }) : handleSlotToggle(selectedPhysician, day, time)}>
+                        {cellPatient || <input type="checkbox" />}
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {confirmRemove && (
+        <div>
+          <p>Remove this patient from this timeslot?</p>
+          <button onClick={confirmRemoveYes}>Yes</button>
+          <button onClick={confirmRemoveNo}>No</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;

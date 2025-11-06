@@ -1,0 +1,56 @@
+package controller;
+
+import dao.PhysicianRepository;
+import dto.PhysicianDTO;
+import model.Physician;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api")
+public class PhysicianController {
+
+    private final PhysicianRepository physicianRepository;
+
+    public PhysicianController(PhysicianRepository physicianRepository) {
+        this.physicianRepository = physicianRepository;
+    }
+
+    @GetMapping("/physicians")
+    public List<PhysicianDTO> getPhysicians() {
+        return physicianRepository.findAll().stream()
+                .map(p -> new PhysicianDTO(p.getId(), p.getFirstName(), p.getLastName()))
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping("/physicians")
+    public PhysicianDTO addPhysician(@RequestBody PhysicianDTO dto) {
+        Physician physician = new Physician(dto.getFirstName(), dto.getLastName());
+        Physician saved = physicianRepository.save(physician);
+        return new PhysicianDTO(saved.getId(), saved.getFirstName(), saved.getLastName());
+    }
+
+    @PutMapping("/physicians/{id}")
+    public PhysicianDTO updatePhysician(@PathVariable Integer id, @RequestBody PhysicianDTO dto) {
+        Physician physician = physicianRepository.findById(id)
+                .map(p -> {
+                    p.setFirstName(dto.getFirstName());
+                    p.setLastName(dto.getLastName());
+                    return physicianRepository.save(p);
+                })
+                .orElseGet(() -> {
+                    Physician newPhysician = new Physician(dto.getFirstName(), dto.getLastName());
+                    newPhysician.setId(id);
+                    return physicianRepository.save(newPhysician);
+                });
+        return new PhysicianDTO(physician.getId(), physician.getFirstName(), physician.getLastName());
+    }
+
+    @DeleteMapping("/physicians/{id}")
+    public void deletePhysician(@PathVariable Integer id) {
+        physicianRepository.deleteById(id);
+    }
+}

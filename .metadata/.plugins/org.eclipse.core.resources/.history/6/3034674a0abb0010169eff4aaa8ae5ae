@@ -1,0 +1,55 @@
+package mainPackage.controller;
+
+import mainPackage.dao.ScheduleRepository;
+import mainPackage.dao.PatientRepository;
+import mainPackage.dao.PhysicianRepository;
+import mainPackage.model.Schedule;
+import mainPackage.model.Patient;
+import mainPackage.model.Physician;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api")
+public class ScheduleController {
+
+    private final ScheduleRepository scheduleRepository;
+    private final PatientRepository patientRepository;
+    private final PhysicianRepository physicianRepository;
+
+    public ScheduleController(ScheduleRepository scheduleRepository,
+                              PatientRepository patientRepository,
+                              PhysicianRepository physicianRepository) {
+        this.scheduleRepository = scheduleRepository;
+        this.patientRepository = patientRepository;
+        this.physicianRepository = physicianRepository;
+    }
+
+    @GetMapping("/schedule")
+    public List<Schedule> getSchedule() {
+        return scheduleRepository.findAll();
+    }
+
+    @PostMapping("/schedule")
+    public Schedule addSchedule(@RequestBody Schedule schedule) {
+        // Validate Patient
+        Patient patient = patientRepository.findById(schedule.getPatient().getId())
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        // Validate Physician
+        Physician physician = physicianRepository.findById(schedule.getPhysician().getId())
+                .orElseThrow(() -> new RuntimeException("Physician not found"));
+
+        schedule.setPatient(patient);
+        schedule.setPhysician(physician);
+
+        return scheduleRepository.save(schedule);
+    }
+
+    @DeleteMapping("/schedule/{id}")
+    public void deleteSchedule(@PathVariable Integer id) {
+        scheduleRepository.deleteById(id);
+    }
+}

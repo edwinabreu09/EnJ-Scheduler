@@ -1,0 +1,87 @@
+package controller;
+
+import dao.ScheduleRepository;
+import dao.PatientRepository;
+import dao.PhysicianRepository;
+import model.Schedule;
+import model.Patient;
+import model.Physician;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api")
+public class ScheduleController {
+
+    private final ScheduleRepository scheduleRepository;
+    private final PatientRepository patientRepository;
+    private final PhysicianRepository physicianRepository;
+
+    public ScheduleController(ScheduleRepository scheduleRepository, 
+                              PatientRepository patientRepository,
+                              PhysicianRepository physicianRepository) {
+        this.scheduleRepository = scheduleRepository;
+        this.patientRepository = patientRepository;
+        this.physicianRepository = physicianRepository;
+    }
+
+    @GetMapping("/schedule")
+    public List<Schedule> getAllSchedules() {
+        return scheduleRepository.findAll();
+    }
+
+    @PostMapping("/schedule")
+    public Schedule addSchedule(@RequestBody Schedule schedule) {
+        // Optional: fetch full Physician and Patient from DB
+        if(schedule.getPhysician() != null) {
+            schedule.setPhysician(
+                physicianRepository.findById(schedule.getPhysician().getId())
+                    .orElseThrow(() -> new RuntimeException("Physician not found"))
+            );
+        }
+
+        if(schedule.getPatient() != null) {
+            schedule.setPatient(
+                patientRepository.findById(schedule.getPatient().getId())
+                    .orElseThrow(() -> new RuntimeException("Patient not found"))
+            );
+        }
+
+        return scheduleRepository.save(schedule);
+    }
+
+    @PutMapping("/schedule/{id}")
+    public Schedule updateSchedule(@PathVariable Integer id, @RequestBody Schedule updatedSchedule) {
+        return scheduleRepository.findById(id).map(s -> {
+            Patient patient = patientRepository.findById(updatedSchedule.getPatient().getId())
+                    .orElseThrow(() -> new RuntimeException("Patient not found"));
+            Physician physician = physicianRepository.findById(updatedSchedule.getPhysician().getId())
+                    .orElseThrow(() -> new RuntimeException("Physician not found"));
+
+            s.setPatient(patient);
+            s.setPhysician(physician);
+            s.setDay(updatedSchedule.getDay());
+            s.setTime(updatedSchedule.getTime());
+
+            return scheduleRepository.save(s);
+        }).orElseGet(() -> {
+            Patient patient = patientRepository.findById(updatedSchedule.getPatient().getId())
+                    .orElseThrow(() -> new RuntimeException("Patient not found"));
+            Physician physician = physicianRepository.findById(updatedSchedule.getPhysician().getId())
+                    .orElseThrow(() -> new RuntimeException("Physician not found"));
+
+            updatedSchedule.setPatient(patient);
+            updatedSchedule.setPhysician(physician);
+            updatedSchedule.setId(id);
+
+            return scheduleRepository.save(updatedSchedule);
+        });
+    }
+
+    @DeleteMapping("/schedule/{id}")
+    public void deleteSchedule(@PathVariable Integer id) {
+        scheduleRepository.deleteById(id);
+    }
+}

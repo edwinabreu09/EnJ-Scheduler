@@ -1,0 +1,17 @@
+package dao;
+
+import model.Schedule;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
+
+    // Find all schedules for a specific physician
+    List<Schedule> findByPhysicianId(Long physicianId);
+
+    // Find schedules for a physician on a specific day
+    List<Schedule> findByPhysicianIdAndDay(Long physicianId, String day);
+}

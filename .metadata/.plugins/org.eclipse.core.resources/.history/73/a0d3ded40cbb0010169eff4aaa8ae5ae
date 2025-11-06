@@ -1,0 +1,68 @@
+package mainPackage.controller;
+
+import mainPackage.model.Schedule;
+import mainPackage.dao.ScheduleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/schedules")
+public class ScheduleController {
+
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+
+    // Get all schedules
+    @GetMapping
+    public List<Schedule> getAllSchedules() {
+        return scheduleRepository.findAll();
+    }
+
+    // Get a schedule by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Schedule> getScheduleById(@PathVariable Integer id) {
+        Optional<Schedule> schedule = scheduleRepository.findById(id);
+        return schedule.map(ResponseEntity::ok)
+                       .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Create a new schedule
+    @PostMapping
+    public Schedule createSchedule(@RequestBody Schedule schedule) {
+        return scheduleRepository.save(schedule);
+    }
+
+    // Update an existing schedule
+    @PutMapping("/{id}")
+    public ResponseEntity<Schedule> updateSchedule(@PathVariable Integer id,
+                                                   @RequestBody Schedule scheduleDetails) {
+        Optional<Schedule> optionalSchedule = scheduleRepository.findById(id);
+        if (!optionalSchedule.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Schedule schedule = optionalSchedule.get();
+        schedule.setDay(scheduleDetails.getDay());
+        schedule.setTime(scheduleDetails.getTime());
+        schedule.setPatientId(scheduleDetails.getPatientId());
+        schedule.setPhysicianId(scheduleDetails.getPhysicianId());
+
+        Schedule updatedSchedule = scheduleRepository.save(schedule);
+        return ResponseEntity.ok(updatedSchedule);
+    }
+
+    // Delete a schedule
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSchedule(@PathVariable Integer id) {
+        if (!scheduleRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        scheduleRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

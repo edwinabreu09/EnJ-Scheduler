@@ -1,0 +1,40 @@
+package controller;
+
+import dao.ScheduleRepository;
+import dto.ScheduleDTO;
+import model.Schedule;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api")
+public class ScheduleController {
+
+    private final ScheduleRepository scheduleRepository;
+
+    public ScheduleController(ScheduleRepository scheduleRepository) {
+        this.scheduleRepository = scheduleRepository;
+    }
+
+    @GetMapping("/schedule")
+    public List<ScheduleDTO> getAllSchedule() {
+        return scheduleRepository.findAll().stream()
+                .map(s -> new ScheduleDTO(s.getId(), s.getPhysicianId(), s.getPatientId(), s.getDay(), s.getTime()))
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping("/schedule")
+    public ScheduleDTO addSchedule(@RequestBody ScheduleDTO dto) {
+        Schedule schedule = new Schedule(dto.getPhysicianId(), dto.getPatientId(), dto.getDay(), dto.getTime());
+        Schedule saved = scheduleRepository.save(schedule);
+        return new ScheduleDTO(saved.getId(), saved.getPhysicianId(), saved.getPatientId(), saved.getDay(), saved.getTime());
+    }
+
+    @DeleteMapping("/schedule/{id}")
+    public void deleteSchedule(@PathVariable Integer id) {
+        scheduleRepository.deleteById(id);
+    }
+}

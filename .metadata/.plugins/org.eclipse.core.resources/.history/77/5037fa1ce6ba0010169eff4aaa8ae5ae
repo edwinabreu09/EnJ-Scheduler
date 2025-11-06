@@ -1,0 +1,29 @@
+package controller;
+
+import dao.PhysicianRepository;
+import model.Physician;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api")
+public class PhysicianController {
+
+    private final PhysicianRepository physicianRepository;
+
+    public PhysicianController(PhysicianRepository physicianRepository) {
+        this.physicianRepository = physicianRepository;
+    }
+
+    @GetMapping("/physicians")
+    public List<Physician> getPhysicians() {
+        return physicianRepository.findAll();
+    }
+
+    @PostMapping("/physicians")
+    public Physician addPhysician(@RequestBody Physician physician) {
+        return physicianRepository.save(physician);
+    }
+}

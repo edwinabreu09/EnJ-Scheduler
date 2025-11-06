@@ -1,0 +1,10 @@
+package dao;
+
+public class PhysicianRepository {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

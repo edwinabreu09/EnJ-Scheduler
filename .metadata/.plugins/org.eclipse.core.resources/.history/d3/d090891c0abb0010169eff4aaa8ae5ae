@@ -1,0 +1,50 @@
+package mainPackage.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "Schedule") // Match exact table name
+public class Schedule {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer Id;
+
+    @ManyToOne
+    @JoinColumn(name = "PhysicianId") // match exact column name
+    private Physician Physician;
+
+    @ManyToOne
+    @JoinColumn(name = "PatientId") // match exact column name
+    private Patient Patient;
+
+    @Column(name = "Day")
+    private String Day;
+
+    @Column(name = "Time")
+    private String Time;
+
+    public Schedule() {}
+
+    public Schedule(Physician Physician, Patient Patient, String Day, String Time) {
+        this.Physician = Physician;
+        this.Patient = Patient;
+        this.Day = Day;
+        this.Time = Time;
+    }
+
+    public Integer getId() { return Id; }
+    public void setId(Integer Id) { this.Id = Id; }
+
+    public Physician getPhysician() { return Physician; }
+    public void setPhysician(Physician Physician) { this.Physician = Physician; }
+
+    public Patient getPatient() { return Patient; }
+    public void setPatient(Patient Patient) { this.Patient = Patient; }
+
+    public String getDay() { return Day; }
+    public void setDay(String Day) { this.Day = Day; }
+
+    public String getTime() { return Time; }
+    public void setTime(String Time) { this.Time = Time; }
+}

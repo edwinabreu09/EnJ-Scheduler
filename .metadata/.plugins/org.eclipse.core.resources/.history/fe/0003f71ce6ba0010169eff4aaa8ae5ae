@@ -1,0 +1,65 @@
+package com.example.patientlookup.controller;
+
+import com.example.patientlookup.model.Schedule;
+import com.example.patientlookup.repository.ScheduleRepository;
+import com.example.patientlookup.model.Patient;
+import com.example.patientlookup.model.Physician;
+import com.example.patientlookup.repository.PatientRepository;
+import com.example.patientlookup.repository.PhysicianRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api")
+public class ScheduleController {
+
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
+    private PhysicianRepository physicianRepository;
+
+    // ------------------ Patients ------------------
+    @GetMapping("/patients")
+    public List<Patient> getAllPatients() {
+        return patientRepository.findAll();
+    }
+
+    @PostMapping("/patients")
+    public Patient addPatient(@RequestBody Patient patient) {
+        return patientRepository.save(patient);
+    }
+
+    // ------------------ Physicians ------------------
+    @GetMapping("/physicians")
+    public List<Physician> getAllPhysicians() {
+        return physicianRepository.findAll();
+    }
+
+    @PostMapping("/physicians")
+    public Physician addPhysician(@RequestBody Physician physician) {
+        return physicianRepository.save(physician);
+    }
+
+    // ------------------ Schedule ------------------
+    @GetMapping("/schedule")
+    public List<Schedule> getAllSchedules() {
+        return scheduleRepository.findAll();
+    }
+
+    @PostMapping("/schedule")
+    public Schedule saveSchedule(@RequestBody Schedule schedule) {
+        return scheduleRepository.save(schedule);
+    }
+
+    @DeleteMapping("/schedule/{id}")
+    public void deleteSchedule(@PathVariable Long id) {
+        scheduleRepository.deleteById(id);
+    }
+}
+v

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 function App() {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
+  const [physicians, setPhysicians] = useState([]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [error, setError] = useState("");
@@ -12,46 +13,65 @@ function App() {
   const [schedule, setSchedule] = useState({});
   const [confirmRemove, setConfirmRemove] = useState(null);
 
-  const physicians = [
-    "Dr. Smith","Dr. Johnson","Dr. Williams","Dr. Brown","Dr. Jones",
-    "Dr. Garcia","Dr. Miller","Dr. Davis","Dr. Rodriguez","Dr. Martinez",
-    "Dr. Hernandez","Dr. Lopez","Dr. Gonzalez","Dr. Wilson","Dr. Anderson",
-    "Dr. Thomas","Dr. Taylor","Dr. Moore","Dr. Jackson","Dr. Martin"
-  ];
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   const generateTimeSlots = () => {
     const slots = [];
     let hour = 7;
     let min = 0;
     while (hour < 19 || (hour === 19 && min === 0)) {
-      slots.push(`${hour.toString().padStart(2,"0")}:${min.toString().padStart(2,"0")}`);
+      slots.push(`${hour.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}`);
       min += 30;
-      if (min === 60) { min = 0; hour += 1; }
+      if (min === 60) {
+        min = 0;
+        hour += 1;
+      }
     }
     return slots;
   };
-
   const timeSlots = generateTimeSlots();
-  const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
+  // ------------------ Load patients, physicians, schedule ------------------
   useEffect(() => {
-    fetch("http://localhost:8080/patients")
-      .then((res) => res.json())
-      .then((data) => {
-        setPatients(data);
-        setFilteredPatients(data);
-      })
-      .catch((err) => console.error("Error fetching patients:", err));
+    const fetchAllData = async () => {
+      try {
+        const patientsRes = await fetch("http://localhost:8080/api/patients");
+        const patientsData = await patientsRes.json();
+        const mappedPatients = patientsData.map(p => ({ ...p, name: `${p.firstName} ${p.lastName}` }));
+        setPatients(mappedPatients);
+        setFilteredPatients(mappedPatients);
+
+        const physiciansRes = await fetch("http://localhost:8080/api/physicians");
+        const physiciansData = await physiciansRes.json();
+        setPhysicians(physiciansData);
+
+        const scheduleRes = await fetch("http://localhost:8080/api/schedule");
+        const scheduleData = await scheduleRes.json();
+        const sched = {};
+        scheduleData.forEach(s => {
+          const physicianName = s.physician.physicianName;
+          const patient = mappedPatients.find(p => p.id === s.patient?.id);
+          if (!sched[physicianName]) sched[physicianName] = {};
+          sched[physicianName][`${s.day}-${s.time}`] = patient ? patient.name : `Patient ${s.patient?.id}`;
+        });
+        setSchedule(sched);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to fetch data from backend");
+      }
+    };
+
+    fetchAllData();
   }, []);
 
+  // ------------------ Patient search ------------------
   const handleSearch = () => {
     if (firstName.trim().length < 3 && lastName.trim().length < 3) {
-      setError("Please enter at least 3 characters in either field.");
+      setError("Enter at least 3 characters.");
       return;
     }
     setError("");
-
-    const filtered = patients.filter((p) => {
+    const filtered = patients.filter(p => {
       const nameLower = p.name.toLowerCase();
       const firstLower = firstName.trim().toLowerCase();
       const lastLower = lastName.trim().toLowerCase();
@@ -60,130 +80,107 @@ function App() {
       if (lastLower) return nameLower.includes(lastLower);
       return false;
     });
-
     setFilteredPatients(filtered);
   };
 
-  const handlePatientClick = (id) => {
-    setSelectedPatientId(id === selectedPatientId ? null : id);
+  // ------------------ Select patient ------------------
+  const handlePatientClick = id => setSelectedPatientId(id === selectedPatientId ? null : id);
+
+  // ------------------ Assign physician ------------------
+  const handlePhysicianChange = (patientId, physicianName) => {
+    setAssignedPhysicians({ ...assignedPhysicians, [patientId]: physicianName });
   };
 
-  const handlePhysicianChange = (patientId, physician) => {
-    setAssignedPhysicians({ ...assignedPhysicians, [patientId]: physician });
-
-    if (!schedule[physician]) {
-      const newSchedule = {};
-      days.forEach(day => timeSlots.forEach(time => newSchedule[`${day}-${time}`] = null));
-      setSchedule(prev => ({ ...prev, [physician]: newSchedule }));
-    }
-  };
-
-  const handleSlotToggle = (physician, day, time) => {
+  // ------------------ Slot toggle ------------------
+  const handleSlotToggle = async (physicianName, day, time) => {
     if (!selectedPatientId) return;
-
     const key = `${day}-${time}`;
-    const currentPatientName = patients.find(p => p.id === selectedPatientId)?.name;
-    const currentCell = schedule[physician]?.[key];
+    const currentCell = schedule[physicianName]?.[key];
 
     if (currentCell) {
-      // Only show popup if cell already assigned
-      setConfirmRemove({ physician, day, time });
+      setConfirmRemove({ physicianName, day, time });
       return;
     }
 
-    // Otherwise assign patient
+    const currentPatient = patients.find(p => p.id === selectedPatientId);
+    const physicianObj = physicians.find(p => p.physicianName === physicianName);
+
+    // Update frontend state
     setSchedule(prev => ({
       ...prev,
-      [physician]: {
-        ...prev[physician],
-        [key]: currentPatientName
-      }
+      [physicianName]: { ...prev[physicianName], [key]: currentPatient.name }
     }));
+
+    // Save to backend
+    try {
+      await fetch("http://localhost:8080/api/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          physician: { id: physicianObj.id },
+          patient: { id: currentPatient.id },
+          day,
+          time
+        })
+      });
+    } catch (err) {
+      console.error("Error saving schedule:", err);
+    }
   };
 
-  const confirmRemoveYes = () => {
+  // ------------------ Remove slot ------------------
+  const confirmRemoveYes = async () => {
     if (!confirmRemove) return;
-    const { physician, day, time } = confirmRemove;
+    const { physicianName, day, time } = confirmRemove;
     const key = `${day}-${time}`;
     setSchedule(prev => ({
       ...prev,
-      [physician]: {
-        ...prev[physician],
-        [key]: null
-      }
+      [physicianName]: { ...prev[physicianName], [key]: null }
     }));
+
+    try {
+      const schedRes = await fetch("http://localhost:8080/api/schedule");
+      const schedData = await schedRes.json();
+      const entry = schedData.find(s => s.physician.physicianName === physicianName && s.day === day && s.time === time);
+      if (entry) await fetch(`http://localhost:8080/api/schedule/${entry.id}`, { method: "DELETE" });
+    } catch (err) {
+      console.error("Error removing schedule:", err);
+    }
+
     setConfirmRemove(null);
   };
-
   const confirmRemoveNo = () => setConfirmRemove(null);
 
-  const isButtonDisabled = firstName.trim().length < 3 && lastName.trim().length < 3;
   const selectedPhysician = selectedPatientId ? assignedPhysicians[selectedPatientId] : null;
+  const isButtonDisabled = firstName.trim().length < 3 && lastName.trim().length < 3;
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        fontFamily: "Arial",
-        minHeight: "100vh",
-        background: "linear-gradient(180deg, #001F3F, #003366)", // Dark blue background
-        color: "white"
-      }}
-    >
-      {/* Top header */}
+    <div style={{ padding: "20px", fontFamily: "Arial", minHeight: "100vh", background: "linear-gradient(180deg, #001F3F, #003366)", color: "white" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
         <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "normal" }}>Patient Lookup & Schedule</h2>
-        <h1 style={{ margin: 0, fontSize: "28px", fontWeight: "bold", color: "#00BFFF" }}>
-          EIJ Scheduler
-        </h1>
+        <h1 style={{ margin: 0, fontSize: "28px", fontWeight: "bold", color: "#00BFFF" }}>EIJ Scheduler</h1>
       </div>
 
       <div style={{ display: "flex", alignItems: "flex-start", gap: "20px" }}>
-        {/* Left panel: Patient list */}
+        {/* Patient Search & List */}
         <div style={{ flex: 1, maxHeight: "85vh", overflowY: "auto" }}>
           <div style={{ marginBottom: "15px" }}>
-            <input
-              type="text" placeholder="First Name" value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              style={{ marginRight: "10px", padding: "5px" }}
-            />
-            <input
-              type="text" placeholder="Last Name" value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              style={{ marginRight: "10px", padding: "5px" }}
-            />
+            <input type="text" placeholder="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} style={{ marginRight: "10px", padding: "5px" }} />
+            <input type="text" placeholder="Last Name" value={lastName} onChange={e => setLastName(e.target.value)} style={{ marginRight: "10px", padding: "5px" }} />
             <button onClick={handleSearch} disabled={isButtonDisabled} style={{ padding: "6px 12px" }}>Go</button>
           </div>
-
           {error && <p style={{ color: "red" }}>{error}</p>}
-
           {filteredPatients.length === 0 ? <p>No matching patients found.</p> :
             <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-              {filteredPatients.map(patient => (
-                <li key={patient.id} style={{
-                  marginBottom: "10px",
-                  cursor: "pointer",
-                  backgroundColor: selectedPatientId === patient.id ? "#224" : "transparent",
-                  padding: "5px",
-                  borderRadius: "4px"
-                }}>
-                  <span
-                    onClick={() => handlePatientClick(patient.id)}
-                    style={{
-                      fontWeight: selectedPatientId === patient.id ? "bold" : "normal",
-                      color: selectedPatientId === patient.id ? "#00BFFF" : "white"
-                    }}
-                  >
-                    {patient.id}: {patient.name}
+              {filteredPatients.map(p => (
+                <li key={p.id} style={{ marginBottom: "10px", cursor: "pointer", backgroundColor: selectedPatientId === p.id ? "#224" : "transparent", padding: "5px", borderRadius: "4px" }}>
+                  <span onClick={() => handlePatientClick(p.id)} style={{ fontWeight: selectedPatientId === p.id ? "bold" : "normal", color: selectedPatientId === p.id ? "#00BFFF" : "white" }}>
+                    {p.id}: {p.name}
                   </span>
-                  {selectedPatientId === patient.id && (
-                    <select
-                      style={{ marginLeft: "10px", padding: "4px" }}
-                      value={assignedPhysicians[patient.id] || ""}
-                      onChange={(e) => handlePhysicianChange(patient.id, e.target.value)}
-                    >
+                  {selectedPatientId === p.id && (
+                    <select style={{ marginLeft: "10px", padding: "4px" }} value={assignedPhysicians[p.id] || ""} onChange={(e) => handlePhysicianChange(p.id, e.target.value)}>
                       <option value="">Select Physician</option>
-                      {physicians.map((doc, idx) => <option key={idx} value={doc}>{doc}</option>)}
+                      {physicians.map((doc, idx) => <option key={idx} value={doc.physicianName}>{doc.physicianName}</option>)}
                     </select>
                   )}
                 </li>
@@ -192,7 +189,7 @@ function App() {
           }
         </div>
 
-        {/* Right panel: Schedule */}
+        {/* Schedule Table */}
         {selectedPhysician && (
           <div style={{ flex: 2, overflowX: "auto" }}>
             <h2>Schedule for {selectedPhysician}</h2>
@@ -200,9 +197,7 @@ function App() {
               <thead>
                 <tr>
                   <th style={{ border: "1px solid #ccc", padding: "5px", width: "60px" }}>Time</th>
-                  {days.map(day => (
-                    <th key={day} style={{ border: "1px solid #ccc", padding: "5px" }}>{day}</th>
-                  ))}
+                  {days.map(d => <th key={d} style={{ border: "1px solid #ccc", padding: "5px" }}>{d}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -213,55 +208,14 @@ function App() {
                       const key = `${day}-${time}`;
                       const cellPatient = schedule[selectedPhysician]?.[key];
                       const isBooked = Boolean(cellPatient);
-
                       return (
-                        <td
-                          key={key}
-                          style={{
-                            border: "1px solid #ccc",
-                            padding: "5px",
-                            backgroundColor: isBooked ? "#555" : "#228B22", // darker green
-                            position: "relative",
-                            height: "40px",
-                            width: "120px",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => {
-                            if (isBooked) {
-                              setConfirmRemove({ physician: selectedPhysician, day, time });
-                            }
-                          }}
-                        >
-                          {!isBooked ? (
-                            <input
-                              type="checkbox"
-                              onChange={() => handleSlotToggle(selectedPhysician, day, time)}
-                              style={{
-                                position: "absolute",
-                                top: "50%",
-                                left: "50%",
-                                transform: "translate(-50%, -50%)",
-                                cursor: "pointer"
-                              }}
-                            />
-                          ) : (
-                            <span
-                              style={{
-                                color: "white",
-                                fontWeight: "bold",
-                                position: "absolute",
-                                top: "50%",
-                                left: "50%",
-                                transform: "translate(-50%, -50%)",
-                                whiteSpace: "nowrap",
-                                textShadow: "1px 1px 2px black",
-                              }}
-                            >
-                              {cellPatient}
-                            </span>
-                          )}
+                        <td key={key} style={{ border: "1px solid #ccc", padding: "5px", backgroundColor: isBooked ? "#555" : "#228B22", height: "40px", width: "120px", position: "relative", cursor: "pointer" }}
+                          onClick={() => { if (isBooked) setConfirmRemove({ physicianName: selectedPhysician, day, time }) }}>
+                          {!isBooked ? <input type="checkbox" onChange={() => handleSlotToggle(selectedPhysician, day, time)} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", cursor: "pointer" }} /> :
+                            <span style={{ color: "white", fontWeight: "bold", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", whiteSpace: "nowrap", textShadow: "1px 1px 2px black" }}>{cellPatient}</span>
+                          }
                         </td>
-                      );
+                      )
                     })}
                   </tr>
                 ))}
@@ -271,23 +225,10 @@ function App() {
         )}
       </div>
 
-      {/* Centered confirmation popup */}
+      {/* Confirm Remove Modal */}
       {confirmRemove && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            background: "rgba(0,0,0,0.9)",
-            padding: "30px",
-            borderRadius: "10px",
-            zIndex: 1000,
-            color: "white",
-            textAlign: "center"
-          }}
-        >
-          <p>Would you like to remove this patient from this timeslot?</p>
+        <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", background: "rgba(0,0,0,0.9)", padding: "30px", borderRadius: "10px", zIndex: 1000, color: "white", textAlign: "center" }}>
+          <p>Remove this patient from this timeslot?</p>
           <button onClick={confirmRemoveYes} style={{ margin: "5px", padding: "6px 12px" }}>Yes</button>
           <button onClick={confirmRemoveNo} style={{ margin: "5px", padding: "6px 12px" }}>No</button>
         </div>

@@ -1,0 +1,15 @@
+package com.example.patientlookup;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
+@SpringBootApplication
+@ComponentScan(basePackages = {"com.example.patientlookup", "controller", "dao", "model", "service", "util"})
+@EnableJpaRepositories(basePackages = {"dao"})
+public class PatientLookupApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(PatientLookupApplication.class, args);
+    }
+}
